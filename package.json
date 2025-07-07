@@ -4,7 +4,9 @@
   "description": "供天启数云（tcct）使用的前端三维地图sdk，在CesiumJS的基础上，对基础功能和通用业务功能进行了封装。",
   "scripts": {
     "build": "turbo run build",
+    "build:example": "turbo run build --filter=@quick-cesium/example",
     "dev": "turbo run dev",
+    "dev:example": "turbo run dev --filter=@quick-cesium/example",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
     "format": "prettier --write \"**/*.{js,cjs,mjs,ts,json,css,scss,vue,html,md}\"",

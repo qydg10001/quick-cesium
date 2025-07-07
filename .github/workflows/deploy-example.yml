@@ -1,0 +1,53 @@
+# .github/workflows/deploy-example.yml
+
+name: Deploy Example App to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main # 或者你的主分支名称，例如 master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest # 使用最新的 Ubuntu 运行环境
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 # 检出代码
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # 根据你的项目需求选择 Node.js 版本
+          cache: 'pnpm' # 或者 'yarn', 'pnpm' 根据你使用的包管理器
+
+      - name: Install dependencies
+        run: pnpm install
+        # 或者 yarn install --frozen-lockfile, pnpm install --frozen-lockfile
+        # 如果你的 Monorepo 需要额外的设置或引导，在这里添加
+        # 例如：run: |
+        #   npm ci
+        #   lerna bootstrap # 如果使用 Lerna
+
+      - name: Build Example App
+        # 替换为你的 Monorepo 构建命令，确保它只构建 example 应用
+        # 并将输出放在 /apps/example/dist (或你的实际输出目录)
+        run: turbo run build --filter=@quick-cesium/example
+        # 示例：使用 npm workspaces 构建 example 应用
+        # 或者：run: yarn workspace apps/example build
+        # 或者：run: nx build example
+        # 或者：run: turbo run build --filter=example
+
+      - name: Deploy to GitHub Pages
+        # 使用 peaceiris/actions-gh-pages action 来部署静态文件
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }} # GitHub 提供的默认 token
+          publish_dir: ./apps/example/dist # ***关键配置***：指向你的 example 应用的构建输出目录
+          publish_branch: gh-pages # 将构建输出推送到 gh-pages 分支
+          # cname: example.yourdomain.com # 如果使用自定义域名，在这里配置
+          # 如果你的应用需要部署到子路径 (例如 username.github.io/repository-name/)
+          # 并且你的应用路由没有处理子路径，可能需要配置 base url
+          # 具体的配置取决于你的前端框架/构建工具 (例如 Vue Router base, React Router basename, Webpack publicPath)
+          # 这个 action 本身不处理 base url，它只负责文件部署。
+          # 如果你的应用需要 base url，请在构建步骤中处理。
