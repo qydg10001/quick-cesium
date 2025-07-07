@@ -6,6 +6,9 @@ import path from 'path'
 // https://vite.dev/config/
 export default defineConfig(() => {
   const basePath = process.env.VITE_BASE_PATH || '/'
+  console.log(`Vite config sees VITE_BASE_PATH: ${process.env.VITE_BASE_PATH}`)
+  console.log(`Vite config using base path: ${basePath}`)
+
   return {
     base: basePath,
     plugins: [vue(), cesium()],
