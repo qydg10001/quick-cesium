@@ -1,0 +1,85 @@
+{
+  // editor
+  "editor.tabSize": 2,
+  "editor.detectIndentation": false,
+  "editor.cursorBlinking": "expand",
+  "editor.largeFileOptimizations": false,
+  "editor.accessibilitySupport": "off",
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.guides.bracketPairs": "active",
+  "editor.inlineSuggest.enabled": true,
+  "editor.suggestSelection": "recentlyUsedByPrefix",
+  "editor.acceptSuggestionOnEnter": "smart",
+  "editor.suggest.snippetsPreventQuickSuggestions": false,
+  "editor.stickyScroll.enabled": true,
+  "editor.hover.sticky": true,
+  "editor.suggest.insertMode": "replace",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.autoClosingBrackets": "beforeWhitespace",
+  "editor.autoClosingDelete": "always",
+  "editor.autoClosingOvertype": "always",
+  "editor.autoClosingQuotes": "beforeWhitespace",
+  "editor.wordSeparators": "`~!@#%^&*()=+[{]}\\|;:'\",.<>/?",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.stylelint": "explicit",
+    "source.organizeImports": "never"
+  },
+  // 启用保存时格式化
+  "editor.formatOnSave": true,
+  // 指定 prettier 为所有文件默认格式化器
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // extension
+  // stylelint相关配置
+  "stylelint.enable": true,
+  "stylelint.packageManager": "pnpm",
+  "stylelint.validate": ["css", "less", "postcss", "scss", "vue"],
+  "stylelint.customSyntax": "postcss-html",
+  "stylelint.snippet": ["css", "less", "postcss", "scss", "vue"],
+
+  "eslint.enable": true,
+  // "eslint.validate": [
+  //   "javascript",
+  //   "typescript",
+  //   "javascriptreact",
+  //   "typescriptreact",
+  //   "vue",
+  //   "html",
+  //   "markdown",
+  //   "json",
+  //   "jsonc",
+  //   "json5"
+  // ],
+
+  // files
+  "files.eol": "\n",
+  "files.insertFinalNewline": true
+}

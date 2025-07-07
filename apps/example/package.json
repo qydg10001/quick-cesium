@@ -1,0 +1,30 @@
+{
+  "name": "@quick-cesium/example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build:check": "vue-tsc -b && vite build",
+    "build": "vite build",
+    "check": "vue-tsc --noEmit",
+    "preview": "vite preview",
+    "lint": "eslint --ext .ts,.tsx,.vue .",
+    "lint:fix": "eslint --ext .ts,.tsx,.vue --fix"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
+    "element-plus": "^2.9.9",
+    "pinia": "^3.0.3",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@quick-cesium/eslint-config": "workspace:*",
+    "@quick-cesium/sdk": "workspace:*",
+    "@quick-cesium/tsconfig": "workspace:*",
+    "@vitejs/plugin-vue": "^5.2.2",
+    "cesium": "^1.129.0",
+    "sass": "^1.87.0",
+    "vite-plugin-cesium": "^1.2.23"
+  }
+}

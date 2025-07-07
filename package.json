@@ -1,0 +1,34 @@
+{
+  "name": "quick-cesium",
+  "version": "0.0.1",
+  "description": "供天启数云（tcct）使用的前端三维地图sdk，在CesiumJS的基础上，对基础功能和通用业务功能进行了封装。",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "format": "prettier --write \"**/*.{js,cjs,mjs,ts,json,css,scss,vue,html,md}\"",
+    "stylelint": "stylelint  \"**/*.{css,scss,vue,html}\" --fix"
+  },
+  "keywords": [],
+  "author": "",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "internal/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@quick-cesium/stylelint-config": "workspace:*",
+    "eslint": "^9.24.0",
+    "prettier": "^3.5.3",
+    "sass": "^1.87.0",
+    "stylelint": "^16.18.0",
+    "turbo": "^2.5.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.1",
+    "vue": "^3.5.13",
+    "vue-tsc": "^2.2.10"
+  },
+  "packageManager": "pnpm@10.0.0"
+}

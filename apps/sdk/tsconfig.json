@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@quick-cesium/tsconfig/library.json",
+  "exclude": ["node_modules", "vite.config.ts"],
+  "compilerOptions": {
+    "emitDeclarationOnly": true, // 只生成声明文件，不生成 JS 文件 (因为 Vite 已经生成了)
+    "outDir": "./dist", // 指定声明文件的输出目录，通常放在 dist 目录下
+    "rootDir": "./src" // 指定你的源代码根目录，tsc 会根据这个路径结构生成类型文件
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@quick-cesium/composables",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@quick-cesium/core": "workspace:*",
+    "cesium": "^1.129.0"
+  },
+  "dependencies": {
+    "@turf/turf": "^7.2.0",
+    "@vueuse/core": "^13.5.0",
+    "mitt": "^3.0.1",
+    "vue": "^3.5.13"
+  }
+}

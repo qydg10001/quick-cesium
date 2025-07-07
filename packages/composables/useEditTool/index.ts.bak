@@ -1,0 +1,339 @@
+import {
+  Viewer,
+  Cartesian3,
+  CustomDataSource,
+  Entity,
+  CallbackProperty,
+  CallbackPositionProperty,
+  Color as CesiumColor,
+  ScreenSpaceEventType,
+  ScreenSpaceEventHandler,
+  PolygonHierarchy,
+  HeightReference,
+} from 'cesium'
+import { useEventBus } from '../useEventBus'
+import { useHoverPosition } from '../useHoverPosition'
+import { ref, watch } from 'vue'
+
+type EditTool = {
+  /**
+   * 绘制点
+   * @returns 绘制的点的世界坐标
+   */
+  drawPoint: () => Promise<Cartesian3>
+  /**
+   * 绘制折线
+   * @returns 所有绘制的世界坐标的数组
+   */
+  drawPolyline: () => Promise<Array<Cartesian3>>
+  /**
+   * 绘制多边形
+   * @returns 所有绘制的世界坐标的数组
+   */
+  drawPolygon: () => Promise<Array<Cartesian3>>
+  /**
+   * 取消当前绘制
+   */
+  abort: () => void
+}
+
+const enum EditToolStatus {
+  Default = 'default',
+  Drawing = 'drawing',
+}
+
+// 所有useEditTool实例共用
+let abortCallback: Function | null = null
+
+const useEditTool = (viewer: Viewer): EditTool => {
+  // 获取实时位置
+  const { isHover, position } = useHoverPosition(viewer)
+  // 获取事件总线
+  const bus = useEventBus(viewer)
+  const status = ref<EditToolStatus>(EditToolStatus.Default)
+
+  // 判断辅助点是否显示
+  watch(
+    () => [status.value, isHover.value],
+    ([nowStatus, hover]) => {
+      if (hover && nowStatus === EditToolStatus.Drawing) {
+        assistPoint.show = true
+      } else {
+        assistPoint.show = false
+      }
+    },
+  )
+
+  // 存储编辑状态辅助entity的图层
+  const assistLayer = new CustomDataSource('__assist_edit')
+  viewer.dataSources.add(assistLayer)
+  // 辅助点，用于显示获取的实际位置
+  // 当启动捕捉（吸附）的时候，该点可能不在鼠标指针位置
+  const assistPoint = new Entity({
+    show: false,
+    position: new CallbackPositionProperty(() => {
+      return position.value || undefined
+    }, false),
+    point: {
+      pixelSize: 7,
+      color: CesiumColor.BLUE,
+      outlineColor: CesiumColor.WHITE,
+      outlineWidth: 1,
+    },
+  })
+  viewer.entities.add(assistPoint)
+
+  const startEdit = () => {
+    // 绑定编辑事件
+  }
+
+  const drawPoint = () => {
+    // 如果在执行其它操作，则取消
+    abort()
+
+    status.value = EditToolStatus.Drawing
+    return new Promise<Cartesian3>((resolve, reject) => {
+      // 清理资源
+      const dispose = () => {
+        abortCallback = null
+        status.value = EditToolStatus.Default
+        bus.offScreen(ScreenSpaceEventType.LEFT_CLICK, handleDraw)
+        bus.offScreen(ScreenSpaceEventType.RIGHT_CLICK, handleCancel)
+      }
+      // 取消绘制
+      const abort = (info?: string) => {
+        dispose()
+        reject(info || '取消点绘制！')
+      }
+      // 左键绘制
+      const handleDraw = () => {
+        if (!position.value) {
+          console.error('坐标信息转换失败，获取的世界坐标异常！')
+          return
+        }
+        const p = position.value
+        dispose()
+
+        setTimeout(() => {
+          resolve(p)
+        }, 0)
+      }
+      const handleCancel = () => abort()
+      // 把取消绘制的回调函数传出去
+      abortCallback = abort
+      // 绑定绘制相关事件
+      bus.onScreen(ScreenSpaceEventType.LEFT_CLICK, handleDraw)
+      bus.onScreen(ScreenSpaceEventType.RIGHT_CLICK, handleCancel)
+    })
+  }
+
+  const drawPolyline = () => {
+    // 如果在执行其它操作，则取消
+    abort()
+
+    status.value = EditToolStatus.Drawing
+    const featurePositions: Array<Cartesian3> = []
+    const tempPolyline = new Entity({
+      polyline: {
+        positions: new CallbackProperty(() => {
+          const positions = [...featurePositions]
+          if (
+            position.value &&
+            !position.value.equals(featurePositions[featurePositions.length - 1])
+          ) {
+            positions.push(position.value)
+          }
+          return positions
+        }, false),
+        width: 2,
+        material: CesiumColor.fromCssColorString('#FF0000'),
+        clampToGround: true,
+      },
+    })
+
+    viewer.entities.add(tempPolyline)
+    return new Promise<Array<Cartesian3>>((resolve, reject) => {
+      // 清理资源
+      const dispose = () => {
+        abortCallback = null
+        status.value = EditToolStatus.Default
+        viewer.entities.remove(tempPolyline)
+        // handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)
+        // handler.removeInputAction(Cesium.ScreenSpaceEventType.RIGHT_CLICK)
+        // handler.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE)
+        bus.offScreen(ScreenSpaceEventType.LEFT_CLICK, handleAddPoint)
+        bus.offScreen(ScreenSpaceEventType.RIGHT_CLICK, handleCancelDraw)
+        bus.offScreen(ScreenSpaceEventType.LEFT_DOUBLE_CLICK, handleEndDraw)
+      }
+      // 取消绘制
+      const abort = (info?: string) => {
+        dispose()
+        reject(info || '取消折线绘制！')
+      }
+      // 左键加点
+      const handleAddPoint = () => {
+        if (
+          position.value &&
+          !position.value.equals(featurePositions[featurePositions.length - 1])
+        ) {
+          featurePositions.push(position.value)
+        }
+      }
+      // 左键双击完成绘制
+      const handleEndDraw = () => {
+        handleAddPoint()
+        if (featurePositions.length < 2) {
+          // proxy.$message.error('请保证折线至少有两个点！')
+          return
+        }
+        dispose()
+        // TODO: 当前方案是为了处理后续弹窗生成，导致这里的右键操作激活右键菜单
+        // 后续可排查原因，优化代码，点和面的类似
+        setTimeout(() => {
+          resolve(featurePositions)
+        }, 0)
+      }
+      // 右键取消绘制
+      const handleCancelDraw = () => {
+        if (featurePositions.length > 0) {
+          // 取消最后绘制的点
+          featurePositions.pop()
+        } else {
+          // 取消绘制
+          abort()
+        }
+      }
+      // 把取消绘制的回调函数传出去
+      abortCallback = abort
+      // 绑定绘制相关事件
+      // handler.setInputAction(handleAddPoint, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+      // handler.setInputAction(handleEndDraw, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+      // handler.setInputAction(handleMouseMove, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+      bus.onScreen(ScreenSpaceEventType.LEFT_CLICK, handleAddPoint)
+      bus.onScreen(ScreenSpaceEventType.RIGHT_CLICK, handleCancelDraw)
+      bus.onScreen(ScreenSpaceEventType.LEFT_DOUBLE_CLICK, handleEndDraw)
+    })
+  }
+
+  const drawPolygon = () => {
+    // 如果在执行其它操作，则取消
+    abort()
+
+    status.value = EditToolStatus.Drawing
+    const featurePositions: Array<Cartesian3> = []
+    const tempPolygon = new Entity({
+      polygon: {
+        hierarchy: new CallbackProperty(() => {
+          const positions = [...featurePositions]
+          if (
+            position.value &&
+            !position.value.equals(featurePositions[featurePositions.length - 1])
+          ) {
+            positions.push(position.value)
+          }
+          if (positions.length < 3) {
+            return null
+          }
+          return new PolygonHierarchy(positions)
+        }, false),
+        heightReference: HeightReference.CLAMP_TO_GROUND,
+        material: CesiumColor.fromCssColorString('#ff0000').withAlpha(0.3),
+      },
+      polyline: {
+        positions: new CallbackProperty(() => {
+          const positions = [...featurePositions]
+          if (
+            position.value &&
+            !position.value.equals(featurePositions[featurePositions.length - 1])
+          ) {
+            positions.push(position.value)
+          }
+          if (featurePositions.length > 0 && featurePositions[0]) {
+            positions.push(featurePositions[0])
+          }
+          return positions
+        }, false),
+        // clampToGround: true,
+        width: 2,
+        material: CesiumColor.fromCssColorString('#ff0000'),
+      },
+    })
+    viewer.entities.add(tempPolygon)
+    return new Promise<Array<Cartesian3>>((resolve, reject) => {
+      // 清理资源
+      const dispose = () => {
+        abortCallback = null
+        status.value = EditToolStatus.Default
+        viewer.entities.remove(tempPolygon)
+        // handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)
+        // handler.removeInputAction(Cesium.ScreenSpaceEventType.RIGHT_CLICK)
+        // handler.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE)
+        bus.offScreen(ScreenSpaceEventType.LEFT_CLICK, handleAddPoint)
+        bus.offScreen(ScreenSpaceEventType.RIGHT_CLICK, handleCancelDraw)
+        bus.offScreen(ScreenSpaceEventType.LEFT_DOUBLE_CLICK, handleEndDraw)
+      }
+      // 取消绘制
+      const abort = (info?: string) => {
+        dispose()
+        reject(info || '取消多边形绘制！')
+      }
+      // 左键加点
+      const handleAddPoint = () => {
+        if (
+          position.value &&
+          !position.value.equals(featurePositions[featurePositions.length - 1])
+        ) {
+          featurePositions.push(position.value)
+        }
+      }
+      // 左键双击完成绘制
+      const handleEndDraw = () => {
+        handleAddPoint()
+        if (featurePositions.length < 3) {
+          // proxy.$message.error('请保多边形至少有三个点！')
+          return
+        }
+        dispose()
+
+        setTimeout(() => {
+          resolve(featurePositions)
+        }, 0)
+      }
+      // 右键取消绘制
+      const handleCancelDraw = () => {
+        if (featurePositions.length > 0) {
+          // 取消最后绘制的点
+          featurePositions.pop()
+        } else {
+          // 取消绘制
+          abort()
+        }
+      }
+      // 把取消绘制的回调函数传出去
+      abortCallback = abort
+      // 绑定绘制相关事件
+      // handler.setInputAction(handleAddPoint, Cesium.ScreenSpaceEventType.LEFT_CLICK)
+      // handler.setInputAction(handleEndDraw, Cesium.ScreenSpaceEventType.RIGHT_CLICK)
+      // handler.setInputAction(handleMouseMove, Cesium.ScreenSpaceEventType.MOUSE_MOVE)
+      bus.onScreen(ScreenSpaceEventType.LEFT_CLICK, handleAddPoint)
+      bus.onScreen(ScreenSpaceEventType.RIGHT_CLICK, handleCancelDraw)
+      bus.onScreen(ScreenSpaceEventType.LEFT_DOUBLE_CLICK, handleEndDraw)
+    })
+  }
+
+  const abort = () => {
+    if (abortCallback) {
+      abortCallback()
+      abortCallback = null
+    }
+  }
+
+  return {
+    drawPoint,
+    drawPolyline,
+    drawPolygon,
+    abort,
+  }
+}
+
+export { useEditTool, type EditTool }

@@ -1,0 +1,19 @@
+{
+  "name": "@quick-cesium/sdk",
+  "version": "0.0.1",
+  "description": "TcctEarth的sdk封装库",
+  "main": "./dist/tcctearth.mjs",
+  "module": "./dist/tcctearth.mjs",
+  "scripts": {
+    "build": "vite build"
+  },
+  "keywords": [],
+  "author": "",
+  "devDependencies": {
+    "@quick-cesium/components": "workspace:*",
+    "@quick-cesium/composables": "workspace:*",
+    "@quick-cesium/core": "workspace:*",
+    "@quick-cesium/tsconfig": "workspace:*",
+    "@vitejs/plugin-vue": "^5.2.2"
+  }
+}

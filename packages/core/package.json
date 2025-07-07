@@ -1,0 +1,23 @@
+{
+  "name": "@quick-cesium/core",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "lint": "eslint --ext .ts,.tsx,.js,.jsx,.vue",
+    "lint:fix": "eslint --ext .ts,.tsx,.js,.jsx,.vue --fix"
+  },
+  "keywords": [],
+  "author": "",
+  "devDependencies": {
+    "@quick-cesium/eslint-config": "workspace:*",
+    "@quick-cesium/tsconfig": "workspace:*",
+    "@types/geojson": "^7946.0.16",
+    "cesium": "^1.129.0",
+    "eslint": "^9.24.0"
+  },
+  "dependencies": {
+    "@turf/turf": "^7.2.0",
+    "gcoord": "^1.0.7"
+  }
+}

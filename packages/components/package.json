@@ -1,0 +1,20 @@
+{
+  "name": "@quick-cesium/components",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "lint": "eslint --ext .ts,.tsx,.js,.jsx,.vue",
+    "lint:fix": "eslint --ext .ts,.tsx,.js,.jsx,.vue --fix"
+  },
+  "keywords": [],
+  "author": "",
+  "devDependencies": {
+    "@quick-cesium/composables": "workspace:*",
+    "@quick-cesium/core": "workspace:*",
+    "@quick-cesium/eslint-config": "workspace:*",
+    "@quick-cesium/tsconfig": "workspace:*",
+    "cesium": "^1.129.0",
+    "eslint": "^9.24.0"
+  }
+}
