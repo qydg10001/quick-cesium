@@ -21,6 +21,9 @@ jobs:
           node-version: '20' # 根据你的项目需求选择 Node.js 版本
           cache: 'pnpm' # 或者 'yarn', 'pnpm' 根据你使用的包管理器
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Install dependencies
         run: pnpm install
         # 或者 yarn install --frozen-lockfile, pnpm install --frozen-lockfile
