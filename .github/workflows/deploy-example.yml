@@ -25,7 +25,7 @@ jobs:
         run: pnpm install
 
       - name: Build Example App
-        run: turbo run build --filter=@quick-cesium/example
+        run: pnpm run build --filter=@quick-cesium/example
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
