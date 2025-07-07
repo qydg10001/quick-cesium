@@ -35,7 +35,7 @@ jobs:
           VITE_BASE_PATH="/${REPO_NAME}/"
           echo "Calculated VITE_BASE_PATH: ${VITE_BASE_PATH}"
           # 设置环境变量并运行构建命令
-          VITE_BASE_PATH=${VITE_BASE_PATH} pnpm run build --filter=@quick-cesium/example
+          pnpm run build --filter=@quick-cesium/example --base=VITE_BASE_PATH
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
