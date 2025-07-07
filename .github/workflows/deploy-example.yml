@@ -34,8 +34,10 @@ jobs:
           # 构造 base 路径，例如 /quick-cesium/
           VITE_BASE_PATH="/${REPO_NAME}/"
           echo "Calculated VITE_BASE_PATH: ${VITE_BASE_PATH}"
+          # ***使用 export 命令将变量导出为环境变量***
+          export VITE_BASE_PATH
           # 设置环境变量并运行构建命令
-          pnpm run build --filter=@quick-cesium/example --base=VITE_BASE_PATH
+          pnpm run build --filter=@quick-cesium/example
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
