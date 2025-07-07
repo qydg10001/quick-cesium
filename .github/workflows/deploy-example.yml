@@ -27,7 +27,15 @@ jobs:
         run: pnpm install
 
       - name: Build Example App
-        run: pnpm run build --filter=@quick-cesium/example
+        # run: pnpm run build --filter=@quick-cesium/example
+        run: |
+          # 提取仓库名称
+          REPO_NAME=$(echo ${{ github.repository }} | cut -d '/' -f 2)
+          # 构造 base 路径，例如 /quick-cesium/
+          VITE_BASE_PATH="/${REPO_NAME}/"
+          echo "Calculated VITE_BASE_PATH: ${VITE_BASE_PATH}"
+          # 设置环境变量并运行构建命令
+          VITE_BASE_PATH=${VITE_BASE_PATH} pnpm run build --filter=@quick-cesium/example
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
