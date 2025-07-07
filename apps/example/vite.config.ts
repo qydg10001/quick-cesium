@@ -11,12 +11,7 @@ export default defineConfig(() => {
 
   return {
     base: basePath,
-    plugins: [
-      vue(),
-      cesium({
-        cesiumBaseUrl: process.env.VITE_BASE_PATH ? '../cesium/' : 'cesium/',
-      }),
-    ],
+    plugins: [vue(), cesium()],
     resolve: {
       // https://cn.vitejs.dev/config/#resolve-alias
       alias: {

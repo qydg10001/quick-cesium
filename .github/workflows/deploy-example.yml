@@ -39,6 +39,33 @@ jobs:
       - name: Build Example App
         run: pnpm run build --filter=@quick-cesium/example
 
+      - name: Move Cesium Assets to Correct Directory
+        run: |
+          # 定义错误的源路径和正确的目的路径
+          # 这里的路径是相对于你的仓库根目录
+          SRC_PATH="./apps/example/dist/${VITE_BASE_PATH}/cesium"
+          DEST_PATH="./apps/example/dist/cesium"
+
+          echo "Checking for Cesium assets at: $SRC_PATH"
+
+          # 检查源路径是否存在，如果存在则移动
+          if [ -d "$SRC_PATH" ]; then
+            echo "Found Cesium assets. Moving from $SRC_PATH to $DEST_PATH"
+            # 确保目标目录的父目录存在
+            mkdir -p $(dirname "$DEST_PATH")
+            # 移动目录
+            mv "$SRC_PATH" "$DEST_PATH"
+            echo "Move complete."
+            # 可选：清理现在可能为空的中间目录
+            # rmdir "./apps/example/dist/${VITE_BASE_PATH}" 2>/dev/null || true
+          else
+            echo "Source path $SRC_PATH not found. Skipping move."
+            # 如果源路径不存在，可能是插件行为改变了，或者构建失败，需要检查
+            exit 1 # 如果期望 Cesium 资产存在但没找到，可能构建有问题，让工作流失败
+          fi
+        # 确保脚本在仓库根目录执行
+        working-directory: ${{ github.workspace }}
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
