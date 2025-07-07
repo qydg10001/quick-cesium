@@ -26,23 +26,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build Example App
-        # run: pnpm run build --filter=@quick-cesium/example
+      - name: Set VITE_BASE_PATH for Build
         run: |
           # 提取仓库名称
           REPO_NAME=$(echo ${{ github.repository }} | cut -d '/' -f 2)
           # 构造 base 路径，例如 /quick-cesium/
           VITE_BASE_PATH="/${REPO_NAME}/"
           echo "Calculated VITE_BASE_PATH: ${VITE_BASE_PATH}"
-          # ***将变量写入 GITHUB_ENV 文件***
+          # 将变量写入 GITHUB_ENV 文件，使其对后续步骤可用
           echo "VITE_BASE_PATH=${VITE_BASE_PATH}" >> $GITHUB_ENV
-          # 运行构建命令。VITE_BASE_PATH 现在是 Job 的环境变量，对所有后续步骤都可用。
-          pnpm run build --filter=@quick-cesium/example
-          # 注意：如果使用 GITHUB_ENV，变量会在当前步骤执行完毕后才对后续步骤生效。
-          # 但在这个例子中，构建命令就在写入 GITHUB_ENV 的同一 run 块中，
-          # 并且 turbo run 会在同一个 shell 环境中执行其子进程，
-          # 所以理论上 export 或 GITHUB_ENV 写入后立即执行命令都应该有效。
-          # 为了更保险，可以将构建命令放在一个单独的步骤中，但通常不需要。
+
+      - name: Build Example App
+        run: pnpm run build --filter=@quick-cesium/example
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
